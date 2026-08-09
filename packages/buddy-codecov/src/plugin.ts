@@ -1,16 +1,17 @@
 import { encode } from '@toon-format/toon'
+import type { cli } from 'clibuilder'
 import { command, z } from 'clibuilder'
-import { compareCoverage } from './coverage-compare.mjs'
+import { compareCoverage } from './coverage-compare.ts'
 
-function write(value, format) {
+function write(value: object, format: 'json' | 'toon' | undefined): void {
 	process.stdout.write(`${format === 'json' ? JSON.stringify(value) : encode(value)}\n`)
 }
 
-function errorMessage(error) {
+function errorMessage(error: unknown): string {
 	return error instanceof Error ? error.message : 'Coverage comparison failed.'
 }
 
-export const compareCommand = command({
+export const compareCommand: cli.Command = command({
 	name: 'compare',
 	description: 'Compare local LCOV coverage with Codecov coverage at a base commit.',
 	options: {
@@ -34,7 +35,7 @@ export const compareCommand = command({
 				baseRef: args['base-ref'],
 				repo: args.repo,
 				reports: args.report ? [args.report] : undefined,
-				token: process.env.CODECOV_API_TOKEN,
+				token: process.env['CODECOV_API_TOKEN'],
 			})
 			write(result, args.format)
 			if (!result.passed) process.exitCode = 1
@@ -45,6 +46,6 @@ export const compareCommand = command({
 	},
 })
 
-export function activate({ addCommand }) {
+export function activate({ addCommand }: { addCommand(command: typeof compareCommand): void }): void {
 	addCommand(compareCommand)
 }

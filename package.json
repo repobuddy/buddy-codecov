@@ -3,14 +3,16 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"build": "turbo build",
 		"bc": "pnpm --filter ./packages/buddy-codecov",
 		"check": "biome check",
 		"check:fix": "biome check --write",
 		"coverage": "turbo run coverage",
 		"prepare": "husky",
 		"release": "changeset publish",
-		"test": "turbo run test",
-		"verify": "pnpm check && pnpm test",
+		"test": "turbo test",
+		"typecheck": "turbo typecheck",
+		"verify": "turbo verify",
 		"version": "changeset version && node scripts/sync-plugin-version.mjs",
 		"web": "pnpm --filter website"
 	},
