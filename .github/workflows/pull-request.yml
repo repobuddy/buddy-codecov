@@ -1,0 +1,48 @@
+name: pull-request
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify
+      - run: pnpm coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          disable_search: true
+          fail_ci_if_error: true
+          files: packages/buddy-codecov/coverage/lcov.info
+          flags: unit
+          use_oidc: true
+      - run: pnpm --filter website build
+
+  all-checks:
+    needs: [ci]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: All checks passed
+        run: |
+          if [[ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
+            exit 1
+          fi
