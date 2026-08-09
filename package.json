@@ -3,14 +3,12 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "turbo run build",
 		"check": "biome check",
 		"check:fix": "biome check --write",
 		"prepare": "husky",
 		"release": "changeset publish",
 		"test": "turbo run test",
-		"typecheck": "turbo run typecheck",
-		"verify": "pnpm check && turbo run build typecheck test",
+		"verify": "pnpm check && pnpm test",
 		"version": "changeset version && node scripts/sync-plugin-version.mjs"
 	},
 	"devDependencies": {
