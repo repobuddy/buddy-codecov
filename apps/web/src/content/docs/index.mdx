@@ -1,0 +1,62 @@
+---
+title: Buddy Codecov
+description: Compare local LCOV coverage with Codecov's base coverage.
+template: splash
+hero:
+  tagline: A portable agent skill for checking whether a change maintains Codecov coverage.
+  actions:
+    - text: View on GitHub
+      link: https://github.com/repobuddy/buddy-codecov
+      icon: external
+      variant: minimal
+---
+
+## What it does
+
+Buddy Codecov reads your local LCOV report, fetches the base commit's total from Codecov, and reports the coverage delta. The command exits unsuccessfully when coverage falls below the base.
+
+## Install
+
+Install the plugin and its `coverage-compare` skill with `npx skills`:
+
+```sh
+npx skills add repobuddy/buddy-codecov --plugin
+```
+
+For Claude Code, add the marketplace and install the plugin:
+
+```text
+/plugin marketplace add repobuddy/buddy-codecov
+/plugin install buddy-codecov@repobuddy
+```
+
+Other agent clients can install the same plugin through their marketplace, or use `npx skills` above.
+
+## Use the skill
+
+Generate LCOV coverage for your project, then ask your agent to compare it with Codecov. The `coverage-compare` skill runs the CLI and reports whether coverage regressed.
+
+## CLI
+
+After the npm package is published, run the CLI without a global install:
+
+```sh
+npx -y buddy-codecov compare
+```
+
+The default output is token-efficient TOON. Set `CODECOV_API_TOKEN` when Codecov requires authentication, and use `--format json` when another program requires JSON.
+
+```sh
+CODECOV_API_TOKEN=<token> npx -y buddy-codecov compare --format json
+```
+
+Run `buddy-codecov compare --help` to see the available options.
+
+## Development
+
+```sh
+pnpm install
+pnpm verify
+pnpm --filter website dev
+pnpm --filter buddy-codecov buddy-codecov compare --help
+```
