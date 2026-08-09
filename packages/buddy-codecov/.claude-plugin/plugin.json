@@ -1,0 +1,10 @@
+{
+	"$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+	"name": "buddy-codecov",
+	"displayName": "Buddy Codecov",
+	"version": "0.1.0",
+	"description": "Codecov coverage comparison skill for AI coding agents",
+	"author": { "name": "repobuddy" },
+	"license": "MIT",
+	"keywords": ["codecov", "coverage", "testing", "agent"]
+}

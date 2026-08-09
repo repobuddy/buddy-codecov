@@ -1,0 +1,26 @@
+{
+	"name": "buddy-codecov",
+	"version": "0.1.0",
+	"description": "Codecov coverage comparison skill for AI coding agents",
+	"license": "MIT",
+	"author": {
+		"name": "repobuddy"
+	},
+	"type": "module",
+	"files": [
+		"skills",
+		"plugin.json",
+		".plugin",
+		".claude-plugin",
+		".cursor-plugin",
+		".codex-plugin"
+	],
+	"scripts": {
+		"build": "node --check skills/codecov-coverage-compare/scripts/compare-codecov-coverage.mjs",
+		"test": "node --test test/*.test.mjs",
+		"typecheck": "node --check skills/codecov-coverage-compare/scripts/compare-codecov-coverage.mjs"
+	},
+	"engines": {
+		"node": ">=22"
+	}
+}

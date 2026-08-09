@@ -1,0 +1,10 @@
+{
+	"name": "buddy-codecov",
+	"version": "0.1.0",
+	"description": "Codecov coverage comparison skill for AI coding agents",
+	"author": { "name": "repobuddy" },
+	"license": "MIT",
+	"keywords": ["codecov", "coverage", "testing", "agent"],
+	"skills": "./skills/",
+	"interface": { "displayName": "Buddy Codecov", "category": "productivity" }
+}
