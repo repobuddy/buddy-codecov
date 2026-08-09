@@ -1,5 +1,5 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.5.7/schema.json",
 	"extends": ["@repobuddy/biome/recommended"],
-	"files": { "includes": ["!renovate.json", "!**/node_modules", "!**/dist", "!**/.astro", "!**/.turbo"] }
+	"files": { "includes": ["!renovate.json", "!**/coverage", "!**/node_modules", "!**/dist", "!**/.astro", "!**/.turbo"] }
 }
