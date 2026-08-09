@@ -17,10 +17,14 @@
 		"buddy-codecov": "./bin/buddy-codecov.mjs"
 	},
 	"exports": {
-		".": "./src/index.mjs"
+		".": {
+			"types": "./dist/index.d.mts",
+			"default": "./dist/index.mjs"
+		}
 	},
 	"files": [
 		"bin",
+		"dist",
 		"src",
 		"skills",
 		"plugin.json",
@@ -30,9 +34,13 @@
 		".codex-plugin"
 	],
 	"scripts": {
-		"buddy-codecov": "node bin/buddy-codecov.mjs",
-		"coverage": "node --input-type=module -e \"import { mkdirSync } from 'node:fs'; mkdirSync('coverage', { recursive: true })\" && node --test --experimental-test-coverage --test-coverage-include=src/**/*.mjs --test-reporter=spec --test-reporter=lcov --test-reporter-destination=stdout --test-reporter-destination=coverage/lcov.info tests/*.test.mjs",
-		"test": "node --test tests/*.test.mjs"
+		"build": "tsdown",
+		"coverage": "vitest run --coverage",
+		"dev": "tsx src/cli.ts",
+		"prepack": "pnpm build",
+		"test": "vitest run",
+		"test:dist": "tsc --noEmit -p tsconfig.dist.json && vitest run --config vitest.dist.config.ts",
+		"typecheck": "tsc --noEmit"
 	},
 	"engines": {
 		"node": ">=22"
@@ -40,5 +48,13 @@
 	"dependencies": {
 		"@toon-format/toon": "^4.1.1",
 		"clibuilder": "^9.1.0"
+	},
+	"devDependencies": {
+		"@types/node": "^24.12.4",
+		"@vitest/coverage-v8": "^4.1.0",
+		"tsdown": "^0.22.0",
+		"tsx": "^4.22.3",
+		"typescript": "^6.0.3",
+		"vitest": "^4.1.0"
 	}
 }
