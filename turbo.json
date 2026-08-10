@@ -1,11 +1,12 @@
 {
 	"$schema": "https://turbo.build/schema.json",
 	"tasks": {
+		"//#check": { "cache": false },
 		"build": { "dependsOn": ["^build"], "outputs": ["dist/**"] },
 		"coverage": { "outputs": ["coverage/**"] },
 		"test": { "dependsOn": ["^build", "build"] },
 		"test:dist": { "dependsOn": ["build"] },
 		"typecheck": { "dependsOn": ["^build"] },
-		"verify": { "dependsOn": ["build", "typecheck", "test", "test:dist"] }
+		"verify": { "dependsOn": ["//#check", "build", "typecheck", "test", "test:dist"] }
 	}
 }
