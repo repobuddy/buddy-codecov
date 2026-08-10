@@ -9,6 +9,12 @@
 		"agent"
 	],
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/repobuddy/buddy-codecov.git"
+	},
+	"bugs": "https://github.com/repobuddy/buddy-codecov/issues",
+	"homepage": "https://github.com/repobuddy/buddy-codecov#readme",
 	"author": {
 		"name": "repobuddy"
 	},

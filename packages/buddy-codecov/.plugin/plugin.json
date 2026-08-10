@@ -4,6 +4,7 @@
 	"version": "0.1.0",
 	"description": "Codecov coverage comparison skill for AI coding agents",
 	"author": { "name": "repobuddy" },
+	"repository": "https://github.com/repobuddy/buddy-codecov",
 	"license": "MIT",
 	"keywords": ["codecov", "coverage", "testing", "agent"],
 	"skills": "./skills/",
