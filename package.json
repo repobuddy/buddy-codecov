@@ -13,7 +13,7 @@
 		"test": "turbo test",
 		"typecheck": "turbo typecheck",
 		"verify": "turbo verify",
-		"version": "changeset version && node scripts/sync-plugin-version.mjs",
+		"version": "changeset version && pnpm dlx universal-plugin@0.2.2 publish sync-version --root packages/buddy-codecov && pnpm dlx universal-plugin@0.2.2 plugin build --root packages/buddy-codecov && pnpm exec biome format --write packages/buddy-codecov/.plugin/plugin.json packages/buddy-codecov/.claude-plugin/plugin.json packages/buddy-codecov/.cursor-plugin/plugin.json packages/buddy-codecov/.codex-plugin/plugin.json packages/buddy-codecov/plugin.json",
 		"web": "pnpm --filter website"
 	},
 	"devDependencies": {
