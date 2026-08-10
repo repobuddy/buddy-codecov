@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { cli } from 'clibuilder'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { main } from './cli.ts'
@@ -21,7 +21,8 @@ const mockedCli = vi.mocked(cli)
 const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
 
 function report(contents = 'SF:src/a.ts\nDA:1,1\nend_of_record\n'): string {
-	const path = join(mkdtempSync(join(tmpdir(), 'buddy-codecov-')), 'lcov.info')
+	const path = join(mkdtempSync(join(tmpdir(), 'buddy-codecov-')), 'coverage', 'lcov.info')
+	mkdirSync(dirname(path), { recursive: true })
 	writeFileSync(path, contents)
 	return path
 }
@@ -211,15 +212,21 @@ describe('plugin command', () => {
 	})
 
 	it('uses the default report and preserves Error messages', async () => {
-		mkdirSync('coverage', { recursive: true })
-		writeFileSync('coverage/lcov.info', 'SF:a.ts\nDA:1,1\n')
-		vi.stubGlobal(
-			'fetch',
-			vi.fn(async () => Promise.reject(new Error('Codecov unavailable'))),
-		)
-		await commandRun({ base: 'abc123', repo: 'repobuddy/buddy-codecov', format: 'json' })
-		expect(stdout).toHaveBeenCalledWith(expect.stringContaining('Codecov unavailable'))
-		expect(process.exitCode).toBe(1)
+		const fixture = report('SF:a.ts\nDA:1,1\n')
+		const originalDirectory = process.cwd()
+		process.chdir(dirname(dirname(fixture)))
+
+		try {
+			vi.stubGlobal(
+				'fetch',
+				vi.fn(async () => Promise.reject(new Error('Codecov unavailable'))),
+			)
+			await commandRun({ base: 'abc123', repo: 'repobuddy/buddy-codecov', format: 'json' })
+			expect(stdout).toHaveBeenCalledWith(expect.stringContaining('Codecov unavailable'))
+			expect(process.exitCode).toBe(1)
+		} finally {
+			process.chdir(originalDirectory)
+		}
 	})
 
 	it('sets a failed exit code for a coverage regression', async () => {

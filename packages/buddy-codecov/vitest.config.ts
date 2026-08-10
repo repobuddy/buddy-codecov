@@ -6,6 +6,7 @@ export default defineConfig({
 		exclude: ['src/**/*.dist.test.ts'],
 		coverage: {
 			provider: 'v8',
+			reporter: ['text', 'lcov'],
 			include: ['src/**/*.ts'],
 			exclude: ['src/**/*.test.ts'],
 			thresholds: {
