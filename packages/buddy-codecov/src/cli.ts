@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { cli } from 'clibuilder'
 import { compareCommand } from './plugin.ts'
 
@@ -16,4 +17,8 @@ export async function main(): Promise<void> {
 		process.stdout.write(`error: ${error instanceof Error ? error.message : 'Invalid command.'}\n`)
 		process.exitCode = 2
 	}
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+	await main()
 }
