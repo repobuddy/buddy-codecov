@@ -1,6 +1,6 @@
 # Buddy Codecov
 
-[![CI](https://github.com/repobuddy/buddy-codecov/actions/workflows/pull-request.yml/badge.svg)](https://github.com/repobuddy/buddy-codecov/actions/workflows/pull-request.yml)
+[![CI](https://github.com/repobuddy/buddy-codecov/actions/workflows/release.yml/badge.svg)](https://github.com/repobuddy/buddy-codecov/actions/workflows/release.yml)
 [![Codecov](https://codecov.io/gh/repobuddy/buddy-codecov/graph/badge.svg)](https://codecov.io/gh/repobuddy/buddy-codecov)
 [![npm](https://img.shields.io/npm/v/buddy-codecov)](https://www.npmjs.com/package/buddy-codecov)
 [![License](https://img.shields.io/npm/l/buddy-codecov)](LICENSE)
