@@ -1,5 +1,11 @@
 # buddy-codecov
 
+## 0.2.0
+
+### Minor Changes
+
+- c4539c4: Run coverage comparisons through the `codecov compare` plugin command.
+
 ## 0.1.0
 
 ### Minor Changes
