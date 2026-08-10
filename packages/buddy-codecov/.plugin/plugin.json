@@ -1,7 +1,7 @@
 {
 	"$schema": "https://raw.githubusercontent.com/cyberuni/universal-plugin/refs/heads/main/schema/v1.json",
 	"name": "buddy-codecov",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Codecov coverage comparison skill for AI coding agents",
 	"author": {
 		"name": "repobuddy"
