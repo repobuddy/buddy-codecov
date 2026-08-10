@@ -1,4 +1,4 @@
-# Buddy Codecov
+# buddy-codecov
 
 [![CI](https://github.com/repobuddy/buddy-codecov/actions/workflows/release.yml/badge.svg)](https://github.com/repobuddy/buddy-codecov/actions/workflows/release.yml)
 [![Codecov](https://codecov.io/gh/repobuddy/buddy-codecov/graph/badge.svg)](https://codecov.io/gh/repobuddy/buddy-codecov)
