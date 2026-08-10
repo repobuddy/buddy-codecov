@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"description": "Codecov coverage comparison skill for AI coding agents",
 	"keywords": [
-		"buddy-codecov-plugin",
+		"repobuddy",
 		"codecov",
 		"coverage",
 		"agent"
