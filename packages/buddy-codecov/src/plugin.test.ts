@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { main } from './cli.ts'
 import { compareCoverage, parseLcov, parseRepository, parseRepositoryName } from './coverage-compare.ts'
 import * as publicApi from './index.ts'
-import { activate, compareCommand } from './plugin.ts'
+import { activate, codecovCommand, compareCommand } from './plugin.ts'
 
 vi.mock('node:child_process', () => ({ execFileSync: vi.fn() }))
 
@@ -190,13 +190,14 @@ describe('coverage comparison', () => {
 })
 
 describe('plugin command', () => {
-	it('writes JSON for a passing comparison and registers the command', async () => {
+	it('writes JSON for a passing comparison and registers it under codecov', async () => {
 		const fetchImpl = vi.fn(async () => response({ totals: { coverage: 50 } }))
 		vi.stubGlobal('fetch', fetchImpl)
 		const addCommand = vi.fn()
 		activate({ addCommand })
 		await commandRun({ base: 'abc123', repo: 'repobuddy/buddy-codecov', report: report(), format: 'json' })
-		expect(addCommand).toHaveBeenCalledWith(compareCommand)
+		expect(addCommand).toHaveBeenCalledWith(codecovCommand)
+		expect(codecovCommand.commands).toEqual([compareCommand])
 		expect(stdout).toHaveBeenCalledWith(expect.stringContaining('"passed":true'))
 		expect(process.exitCode).toBeUndefined()
 	})

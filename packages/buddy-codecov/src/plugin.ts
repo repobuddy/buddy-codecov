@@ -46,6 +46,12 @@ export const compareCommand: cli.Command = command({
 	},
 })
 
-export function activate({ addCommand }: { addCommand(command: typeof compareCommand): void }): void {
-	addCommand(compareCommand)
+export const codecovCommand: cli.Command = command({
+	name: 'codecov',
+	description: 'Codecov coverage commands.',
+	commands: [compareCommand],
+})
+
+export function activate({ addCommand }: { addCommand(command: typeof codecovCommand): void }): void {
+	addCommand(codecovCommand)
 }

@@ -1,1 +1,1 @@
-export { activate, compareCommand } from './plugin.ts'
+export { activate, codecovCommand, compareCommand } from './plugin.ts'
