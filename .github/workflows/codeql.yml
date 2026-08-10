@@ -31,3 +31,7 @@ jobs:
           languages: ${{ matrix.language }}
       - uses: github/codeql-action/autobuild@v4
       - uses: github/codeql-action/analyze@v4
+        # Merge-queue refs disappear as soon as GitHub merges the group.
+        # Upload results from the durable PR and main push workflows instead.
+        with:
+          upload: ${{ github.event_name == 'merge_group' && 'never' || 'always' }}
