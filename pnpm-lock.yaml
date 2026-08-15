@@ -43,8 +43,8 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1
       clibuilder:
-        specifier: ^9.1.0
-        version: 9.1.0
+        specifier: ^10.0.0
+        version: 10.1.0
     devDependencies:
       '@types/node':
         specifier: ^24.12.4
@@ -1472,9 +1472,9 @@ packages:
     resolution: {integrity: sha512-77PSwercCZU2Fc4sX94eF8k8Pxte6JAwL4/ICZLFjJLqegs7kCuAsqqj/70NQF6TvDpgFjkubQB2FW2ZZddvQg==}
     engines: {node: '>=8'}
 
-  clibuilder@9.1.0:
-    resolution: {integrity: sha512-++CI3XcK/jf7EBTRKRhtgn3/5bsrnqigQbkFsoyttWwgV96NIOMneVtsy1/KUG7ZWhsAg0Zh9wDUJP3PJ7a68g==}
-    engines: {node: '>= 18'}
+  clibuilder@10.1.0:
+    resolution: {integrity: sha512-JbaMzimIyASNqVPbnWbS8eUroy9HlRQBsD0GN74/B2bqkg+lx3PiGyjkpdqkxvjz1pBXfGFEBT3BW9eoq8cKBw==}
+    engines: {node: '>= 20.19'}
 
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
@@ -1734,9 +1734,9 @@ packages:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
     engines: {node: '>=8'}
 
-  find-installed-packages@3.1.1:
-    resolution: {integrity: sha512-aFA7JbUCysD/ACS89o2hrEdgMtXV5mm+AJBxySQXGLe7Z+TzFw5YDFlI+6WAOSTKRqbkC5v105ToO0/krRn+4A==}
-    engines: {bun: '>=1.0', node: '>=14'}
+  find-installed-packages@4.0.0:
+    resolution: {integrity: sha512-PKkQCxMpOrW1cHEE9oQOTvDOMD++Bw0HT+nQpWrhXQrairaQA4m+cDdosQjAmNGQ0lCkkGWuuPrksDXE9B7Cug==}
+    engines: {bun: '>=1.0', node: '>=20.19'}
 
   find-process@2.1.1:
     resolution: {integrity: sha512-SrQDx3QhlmHM90iqn9rdjCQcw/T+WlpOkHFsjoRgB+zTpDfltNA1VSNYeYELwhUTJy12UFxqjWhmhOrJc+o4sA==}
@@ -4483,10 +4483,11 @@ snapshots:
 
   ci-info@4.4.0: {}
 
-  clibuilder@9.1.0:
+  clibuilder@10.1.0:
     dependencies:
-      find-installed-packages: 3.1.1
+      find-installed-packages: 4.0.0
       js-yaml: 4.3.1
+      jsonc-parser: 3.3.1
       pad-right: 0.2.2
       search-packages: 2.2.1
       standard-log: 12.1.2
@@ -4757,8 +4758,9 @@ snapshots:
     dependencies:
       to-regex-range: 5.0.1
 
-  find-installed-packages@3.1.1:
+  find-installed-packages@4.0.0:
     dependencies:
+      package-manager-detector: 1.8.0
       temp: 0.9.4
       unpartial: 1.0.5
 
