@@ -31,8 +31,8 @@ jobs:
       - name: Create version pull request or publish packages
         uses: changesets/action@v2.1.2
         with:
-          commit: "chore: version packages"
-          version: pnpm run version
-          publish: pnpm run release
+          commit-message: "chore: version packages"
+          version-script: pnpm run version
+          publish-script: pnpm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
