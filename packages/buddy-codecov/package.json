@@ -37,7 +37,8 @@
 		".plugin",
 		".claude-plugin",
 		".cursor-plugin",
-		".codex-plugin"
+		".codex-plugin",
+		"CHANGELOG.md"
 	],
 	"scripts": {
 		"build": "tsdown",
