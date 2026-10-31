@@ -57,7 +57,7 @@
 		"clibuilder": "^11.0.0"
 	},
 	"devDependencies": {
-		"@types/node": "^24.12.4",
+		"@types/node": "^26.0.0",
 		"@vitest/coverage-v8": "^5.0.0",
 		"tsdown": "^0.23.0",
 		"tsx": "^4.22.3",
