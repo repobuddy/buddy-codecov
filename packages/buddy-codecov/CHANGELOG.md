@@ -1,5 +1,11 @@
 # buddy-codecov
 
+## 0.2.2
+
+### Patch Changes
+
+- 8e50960: Include `CHANGELOG.md` in the published package.
+
 ## 0.2.1
 
 ### Patch Changes

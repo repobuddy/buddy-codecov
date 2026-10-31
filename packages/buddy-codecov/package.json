@@ -1,6 +1,6 @@
 {
 	"name": "buddy-codecov",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "Codecov coverage comparison skill for AI coding agents",
 	"keywords": [
 		"repobuddy",
