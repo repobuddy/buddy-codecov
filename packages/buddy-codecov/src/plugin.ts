@@ -1,6 +1,6 @@
 import { encode } from '@toon-format/toon'
 import type { cli } from 'clibuilder'
-import { command, z } from 'clibuilder'
+import { command, t } from 'clibuilder'
 import { compareCoverage } from './coverage-compare.ts'
 
 function write(value: object, format: 'json' | 'toon' | undefined): void {
@@ -17,14 +17,14 @@ export const compareCommand: cli.Command = command({
 	options: {
 		base: {
 			description: 'Base commit SHA. Defaults to the merge-base with the default branch.',
-			type: z.optional(z.string()),
+			type: t.string().optional(),
 		},
-		'base-ref': { description: 'Base branch reference when --base is omitted.', type: z.optional(z.string()) },
-		repo: { description: 'GitHub repository as <owner>/<name>. Defaults to origin.', type: z.optional(z.string()) },
-		report: { description: 'LCOV report path. Defaults to coverage/lcov.info.', type: z.optional(z.string()) },
+		'base-ref': { description: 'Base branch reference when --base is omitted.', type: t.string().optional() },
+		repo: { description: 'GitHub repository as <owner>/<name>. Defaults to origin.', type: t.string().optional() },
+		report: { description: 'LCOV report path. Defaults to coverage/lcov.info.', type: t.string().optional() },
 		format: {
 			description: 'Output format: toon (default) or json.',
-			type: z.optional(z.enum(['toon', 'json'])),
+			type: t.enum(['toon', 'json']).optional(),
 			default: 'toon',
 		},
 	},
