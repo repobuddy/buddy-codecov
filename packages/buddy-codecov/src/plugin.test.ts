@@ -2,22 +2,16 @@ import { execFileSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { cli } from 'clibuilder'
+import { testCommand } from 'clibuilder/testing'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { main } from './cli.ts'
 import { compareCoverage, parseLcov, parseRepository, parseRepositoryName } from './coverage-compare.ts'
 import * as publicApi from './index.ts'
-import { activate, codecovCommand, compareCommand } from './plugin.ts'
+import { activate, codecovCommand, compareCommand, createDefaultCommand } from './plugin.ts'
 
 vi.mock('node:child_process', () => ({ execFileSync: vi.fn() }))
 
-vi.mock('clibuilder', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('clibuilder')>()
-	return { ...actual, cli: vi.fn() }
-})
-
 const mockedExecFileSync = vi.mocked(execFileSync)
-const mockedCli = vi.mocked(cli)
 const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
 
 function report(contents = 'SF:src/a.ts\nDA:1,1\nend_of_record\n'): string {
@@ -31,13 +25,8 @@ function response(body: unknown, status = 200): { json(): Promise<unknown>; ok: 
 	return { ok: status >= 200 && status < 300, status, json: async () => body }
 }
 
-function commandRun(args: Record<string, string | undefined>): Promise<void> {
-	return (compareCommand as { run(args: Record<string, string | undefined>): Promise<void> }).run(args)
-}
-
 beforeEach(() => {
 	mockedExecFileSync.mockReset()
-	mockedCli.mockReset()
 	stdout.mockClear()
 	process.exitCode = undefined
 	vi.unstubAllEnvs()
@@ -190,58 +179,145 @@ describe('coverage comparison', () => {
 })
 
 describe('plugin command', () => {
-	it('writes JSON for a passing comparison and registers it under codecov', async () => {
-		const fetchImpl = vi.fn(async () => response({ totals: { coverage: 50 } }))
-		vi.stubGlobal('fetch', fetchImpl)
+	it('answers a passing comparison in TOON and registers it under codecov', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn(async () => response({ totals: { coverage: 50 } })),
+		)
 		const addCommand = vi.fn()
 		activate({ addCommand })
-		await commandRun({ base: 'abc123', repo: 'repobuddy/buddy-codecov', report: report(), format: 'json' })
+		const { messages, exitCode } = await testCommand(
+			compareCommand,
+			`compare --base abc123 --repo repobuddy/buddy-codecov --report ${report()}`,
+		)
 		expect(addCommand).toHaveBeenCalledWith(codecovCommand)
 		expect(codecovCommand.commands).toEqual([compareCommand])
-		expect(stdout).toHaveBeenCalledWith(expect.stringContaining('"passed":true'))
+		expect(messages).toContain('status: passed')
+		expect(messages).not.toContain('help')
+		expect(exitCode).toBeUndefined()
 		expect(process.exitCode).toBeUndefined()
 	})
 
-	it('writes TOON error output for rejected comparisons and non-Error failures', async () => {
+	it('answers JSON through the global --format option', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn(async () => response({ totals: { coverage: 50 } })),
+		)
+		const { messages } = await testCommand(
+			compareCommand,
+			`compare --base abc123 --repo repobuddy/buddy-codecov --report ${report()} --format json`,
+		)
+		expect(JSON.parse(messages)).toMatchObject({ passed: true, baseSha: 'abc123' })
+	})
+
+	it('reports a non-Error network failure', async () => {
 		vi.stubGlobal(
 			'fetch',
 			vi.fn(async () => Promise.reject('unavailable')),
 		)
-		await commandRun({ base: 'abc123', repo: 'repobuddy/buddy-codecov', report: report() })
-		expect(stdout).toHaveBeenCalledWith(expect.stringContaining('Coverage comparison failed.'))
-		expect(process.exitCode).toBe(1)
+		const { messages } = await testCommand(
+			compareCommand,
+			`compare --base abc123 --repo repobuddy/buddy-codecov --report ${report()}`,
+		)
+		expect(messages).toContain('Could not reach Codecov: request failed.')
 	})
 
-	it('uses the default report and preserves Error messages', async () => {
+	it('has examples on the command', () => {
+		expect(compareCommand.examples?.length).toBeGreaterThan(0)
+		expect(createDefaultCommand().examples?.length).toBeGreaterThan(0)
+	})
+
+	it('reports a coded error with a help line when the comparison cannot finish', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn(async () => response({ detail: 'The commit abc123 is not in our records.' }, 404)),
+		)
+		const { messages, exitCode } = await testCommand(
+			compareCommand,
+			`compare --base abc123 --repo repobuddy/buddy-codecov --report ${report()}`,
+		)
+		expect(messages).toContain('code: no-base-record')
+		expect(messages).toContain('help')
+		expect(exitCode).toBe(1)
+	})
+
+	it('reports a missing report with its code', async () => {
+		const { messages, exitCode } = await testCommand(
+			compareCommand,
+			'compare --base abc123 --repo repobuddy/buddy-codecov --report /nonexistent/lcov.info',
+		)
+		expect(messages).toContain('code: no-report')
+		expect(exitCode).toBe(1)
+	})
+
+	it('reports an invalid repository as a coded error', async () => {
+		const { messages, exitCode } = await testCommand(
+			compareCommand,
+			`compare --base abc123 --repo nope --report ${report()}`,
+		)
+		expect(messages).toContain('code: invalid-repo')
+		expect(exitCode).toBe(1)
+	})
+
+	it('rejects the removed command-level format values as usage errors', async () => {
+		const { messages, exitCode } = await testCommand(compareCommand, 'compare --format yaml')
+		expect(messages).toContain('code: invalid-value')
+		expect(exitCode).toBe(2)
+	})
+
+	it('uses the default report', async () => {
 		const fixture = report('SF:a.ts\nDA:1,1\n')
 		const originalDirectory = process.cwd()
 		process.chdir(dirname(dirname(fixture)))
-
 		try {
 			vi.stubGlobal(
 				'fetch',
 				vi.fn(async () => Promise.reject(new Error('Codecov unavailable'))),
 			)
-			await commandRun({ base: 'abc123', repo: 'repobuddy/buddy-codecov', format: 'json' })
-			expect(stdout).toHaveBeenCalledWith(expect.stringContaining('Codecov unavailable'))
-			expect(process.exitCode).toBe(1)
+			const { messages, exitCode } = await testCommand(
+				compareCommand,
+				'compare --base abc123 --repo repobuddy/buddy-codecov',
+			)
+			expect(messages).toContain('Codecov unavailable')
+			expect(messages).toContain('code: codecov-unreachable')
+			expect(exitCode).toBe(1)
 		} finally {
 			process.chdir(originalDirectory)
 		}
 	})
 
-	it('sets a failed exit code for a coverage regression', async () => {
+	it('sets a failed exit code and a help line for a coverage regression', async () => {
 		vi.stubGlobal(
 			'fetch',
 			vi.fn(async () => response({ totals: { coverage: 100 } })),
 		)
-		await commandRun({
-			base: 'abc123',
-			repo: 'repobuddy/buddy-codecov',
-			report: report('SF:a.ts\nDA:1,0\n'),
-			format: 'json',
-		})
+		const { messages } = await testCommand(
+			compareCommand,
+			`compare --base abc123 --repo repobuddy/buddy-codecov --report ${report('SF:a.ts\nDA:1,0\n')}`,
+		)
+		expect(messages).toContain('status: regressed')
+		expect(messages).toContain('help')
 		expect(process.exitCode).toBe(1)
+	})
+
+	it('states an empty report definitively instead of passing silently', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn(async () => response({ totals: { coverage: 100 } })),
+		)
+		const { messages, exitCode } = await testCommand(
+			compareCommand,
+			`compare --base abc123 --repo repobuddy/buddy-codecov --report ${report('')}`,
+		)
+		expect(messages).toContain('empty: 0 instrumented lines found in the report')
+		expect(exitCode).toBeUndefined()
+	})
+
+	it('lists the compare command when the codecov group is run bare', async () => {
+		const { messages, exitCode } = await testCommand(codecovCommand, 'codecov')
+		expect(messages).toContain('code: missing-command')
+		expect(messages).toContain('compare')
+		expect(exitCode).toBe(2)
 	})
 })
 
@@ -251,25 +327,28 @@ describe('CLI and public entry point', () => {
 		expect(publicApi.compareCommand).toBe(compareCommand)
 	})
 
-	it('parses a CLI invocation', async () => {
-		const parse = vi.fn(async () => undefined)
-		mockedCli.mockReturnValue({ command: vi.fn(() => ({ parse })) } as never)
-		await main()
-		expect(parse).toHaveBeenCalledWith(process.argv)
+	it('shows live data with a home header when run bare', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn(async () => response({ totals: { coverage: 50 } })),
+		)
+		const { messages } = await testCommand(
+			createDefaultCommand(),
+			`--base abc123 --repo repobuddy/buddy-codecov --report ${report()}`,
+		)
+		expect(messages).toMatch(/^bin: /)
+		expect(messages).toContain('description: Compare local LCOV coverage')
+		expect(messages).toContain('status: passed')
 	})
 
-	it('reports Error and non-Error CLI failures', async () => {
-		const parse = vi.fn(async () => Promise.reject(new Error('bad options')))
-		mockedCli.mockReturnValue({ command: vi.fn(() => ({ parse })) } as never)
-		await main()
-		expect(stdout).toHaveBeenCalledWith('error: bad options\n')
-		expect(process.exitCode).toBe(2)
-
-		stdout.mockClear()
-		process.exitCode = undefined
-		parse.mockImplementationOnce(async () => Promise.reject('bad options'))
-		await main()
-		expect(stdout).toHaveBeenCalledWith('error: Invalid command.\n')
-		expect(process.exitCode).toBe(2)
+	it('parses a CLI invocation, reporting errors itself', async () => {
+		const argv = process.argv
+		process.argv = ['node', 'buddy-codecov', '--version']
+		try {
+			await main()
+		} finally {
+			process.argv = argv
+		}
+		expect(stdout).toHaveBeenCalledWith(expect.stringContaining('0.0.0'))
 	})
 })

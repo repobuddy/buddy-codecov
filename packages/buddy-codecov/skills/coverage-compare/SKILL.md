@@ -15,7 +15,7 @@ description: Compare local LCOV coverage with the Codecov coverage stored for a 
    ```
 
    If that path cannot be resolved, fall back to `npx -y buddy-codecov compare`. Flags below work the same in either form, and the default output is token-efficient TOON.
-3. Set `CODECOV_API_TOKEN` when Codecov requires authentication. Use `--format json` only when another program requires JSON.
+3. Set `CODECOV_API_TOKEN` when Codecov requires authentication. Use `--format json` only when another program requires JSON. A regression exits `1` and the answer's `help` line says what to do; an error carries a `code` and a `help` line.
 4. Use `--base <sha>` for a specific Codecov report, `--base-ref <ref>` for another branch, or `--report <path>` for a non-default LCOV report.
 
 ## Constraints

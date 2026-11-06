@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
+import { CliError } from 'clibuilder'
 
 const DEFAULT_REPORTS = ['coverage/lcov.info']
 
@@ -70,19 +71,33 @@ export function parseLcov(lcov: string): CoverageTotals {
 
 export function parseRepository(remoteUrl: string): Repository {
 	const match = remoteUrl.match(/(?:github\.com[:/])([^/]+)\/([^/]+?)(?:\.git)?$/)
-	if (!match?.[1] || !match[2]) throw new Error('Could not derive a GitHub repository. Pass --repo <owner>/<name>.')
+	if (!match?.[1] || !match[2])
+		throw new CliError('Could not derive a GitHub repository. Pass --repo <owner>/<name>.', {
+			code: 'no-repository',
+			help: 'Pass --repo <owner>/<name>, or run from a clone whose origin is on GitHub.',
+		})
 	return { owner: match[1], name: match[2] }
 }
 
 export function parseRepositoryName(value: string): Repository {
 	const [owner, name, extra] = value.split('/')
-	if (!owner || !name || extra) throw new Error('--repo must be <owner>/<name>.')
+	if (!owner || !name || extra)
+		throw new CliError('--repo must be <owner>/<name>.', {
+			code: 'invalid-repo',
+			details: { value },
+			help: 'Pass --repo repobuddy/buddy-codecov, as <owner>/<name>.',
+		})
 	return { owner, name }
 }
 
 function readCoverage(reports: string[]): CoverageTotals {
 	const paths = reports.filter((path) => existsSync(path))
-	if (paths.length === 0) throw new Error('No LCOV reports found. Pass --report <path> after running coverage.')
+	if (paths.length === 0)
+		throw new CliError('No LCOV reports found. Pass --report <path> after running coverage.', {
+			code: 'no-report',
+			details: { searched: reports.join(', ') },
+			help: 'Run the coverage command to write coverage/lcov.info, or pass --report <path>.',
+		})
 	return parseLcov(paths.map((path) => readFileSync(path, 'utf8')).join('\n'))
 }
 
@@ -104,7 +119,11 @@ function defaultBaseSha(baseRef: string | undefined): string {
 			ref = remoteBranches.split('\n').find((branch) => branch === 'origin/main' || branch === 'origin/master')
 		}
 	}
-	if (!ref) throw new Error('Could not determine the default branch. Pass --base or --base-ref.')
+	if (!ref)
+		throw new CliError('Could not determine the default branch. Pass --base or --base-ref.', {
+			code: 'no-default-branch',
+			help: 'Pass --base <sha> or --base-ref <ref>.',
+		})
 	return git(['merge-base', 'HEAD', ref])
 }
 
@@ -125,7 +144,15 @@ async function fetchCodecovCoverage(
 	const url = new URL(`https://api.codecov.io/api/v2/github/${repository.owner}/repos/${repository.name}/totals/`)
 	url.searchParams.set('sha', sha)
 	const options = token ? { headers: { Authorization: `Bearer ${token}` } } : {}
-	const response = await fetchImpl(url, options)
+	let response: FetchResponse
+	try {
+		response = await fetchImpl(url, options)
+	} catch (error) {
+		throw new CliError(`Could not reach Codecov: ${error instanceof Error ? error.message : 'request failed'}.`, {
+			code: 'codecov-unreachable',
+			help: 'Check the network connection, then retry.',
+		})
+	}
 	if (!response.ok) {
 		const body = await response.json().catch(() => undefined)
 		if (
@@ -134,15 +161,28 @@ async function fetchCodecovCoverage(
 			typeof body.detail === 'string' &&
 			body.detail.includes('not in our records')
 		) {
-			throw new Error(
+			throw new CliError(
 				`Codecov has no coverage record for ${repository.owner}/${repository.name}@${sha}. Upload coverage for that commit before comparing.`,
+				{
+					code: 'no-base-record',
+					details: { sha },
+					help: 'Upload coverage for that commit, or pass --base <sha> for one Codecov has.',
+				},
 			)
 		}
-		throw new Error(`Codecov API request failed (${response.status}). Set CODECOV_API_TOKEN if required.`)
+		throw new CliError(`Codecov API request failed (${response.status}). Set CODECOV_API_TOKEN if required.`, {
+			code: 'codecov-api-error',
+			details: { status: response.status },
+			help: 'Set CODECOV_API_TOKEN when Codecov requires authentication, then retry.',
+		})
 	}
 	const body = await response.json()
 	if (!isCodecovResponse(body) || !hasCodecovCoverage(body))
-		throw new Error(`Codecov has no coverage totals for ${sha}.`)
+		throw new CliError(`Codecov has no coverage totals for ${sha}.`, {
+			code: 'no-base-totals',
+			details: { sha },
+			help: 'Pass --base <sha> for a commit whose coverage Codecov has processed.',
+		})
 	return body.totals
 }
 

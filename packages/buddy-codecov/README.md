@@ -36,10 +36,12 @@ After the npm package is published, run the CLI without a global installation:
 npx -y buddy-codecov compare
 ```
 
-The command reads `coverage/lcov.info`, derives the repository and merge-base from Git, then writes token-efficient TOON. Use `CODECOV_API_TOKEN` when Codecov requires authentication.
+The command reads `coverage/lcov.info`, derives the repository and merge-base from Git, then writes token-efficient TOON on stdout: a `status` (`passed` or `regressed`), a `summary` line, and a `help` line after a regression. Errors are on stdout too, with a stable `code` and a `help` line, and exit `1`; a wrong command line exits `2`. Running `buddy-codecov` with no command compares coverage, under a `bin` and `description` header. Use `CODECOV_API_TOKEN` when Codecov requires authentication.
 
 ```sh
 CODECOV_API_TOKEN=<token> npx -y buddy-codecov compare --format json
 ```
 
-Use `buddy-codecov compare --help` to see `--base`, `--base-ref`, `--repo`, and `--report`.
+`--format` is clibuilder's global option: `toon` (default), `json` or `text`.
+
+Use `buddy-codecov compare --help` to see `--base`, `--base-ref`, `--repo`, and `--report`, with examples.
